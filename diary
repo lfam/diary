@@ -1,0 +1,20 @@
+#!/bin/sh
+
+do_git() {
+	git rev-parse --git-dir 2> /dev/null &&
+	git add $1 &&
+	printf "Auto-commit by diary of $1\n" | git commit $1 -F - 
+}
+
+insert_date() {
+	date="$(date -R)"
+	printf "$date\n" | cat - $1 > $1.swp && mv $1.swp $1
+}
+
+main() {
+	insert_date .log
+	${EDITOR:-vi} .log
+	do_git .log
+}
+
+main
