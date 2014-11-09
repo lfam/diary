@@ -1,5 +1,12 @@
 #!/bin/sh
 
+usage="Diary, for keeping a timestamped journal in a directory. If the
+directory is a git repo, your edits will be checked into git.
+
+Usage:	diary			# open your diary
+	diary --help		# print this help page
+"
+
 do_git() {
 	git rev-parse --git-dir 2> /dev/null &&
 	git add $1 &&
@@ -23,6 +30,14 @@ prepend_date() {
 }
 
 main() {
+	if [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "-help" ]; then
+		printf "$usage"
+		return 0
+	elif [ -n $1 ]; then
+		printf "$usage"
+		return 1
+	fi
+
 	date="$(date +"%a,%e %b %G %H:%M:%S %z")"
 	diary=.log
 
@@ -33,4 +48,4 @@ main() {
 		do_git $diary
 	fi
 }
-main
+main "$@"
