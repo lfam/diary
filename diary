@@ -3,21 +3,40 @@
 do_git() {
 	git rev-parse --git-dir 2> /dev/null &&
 	git add $1 &&
-	printf "Auto-commit by diary of $1\n" | git commit $1 -F - 
+	printf "Auto-commit of $1 by diary program\n" | git commit $1 -F - 
+}
+
+edit() {
+	${EDITOR:-vi} $1$2
+}
+
+changed() {
+	prepend_date $1 $3
+	if diff "$1$2" "$1$3" >/dev/null 2>&1 ; then
+		rm $1$2
+		return 1
+	else
+		mv $1$2 $1
+		return 0
+	fi
+	rm $1$3
 }
 
 prepend_date() {
-	date="$(date +"%a,%e %b %G %H:%M:%S %z")"
-	printf "$date\n\n" | cat - $1 > $1.swp && mv $1.swp $1
+	printf "$date\n\n" | cat - $1 > $1$2
 }
 
 main() {
 
+	date="$(date +"%a,%e %b %G %H:%M:%S %z")"
 	diary=.log
-	touch $diary
-	prepend_date $diary
-	${EDITOR:-vi} $diary
-	do_git $diary
+
+	test -f $diary || touch $diary
+	prepend_date $diary .swp
+	edit $diary .swp
+	if changed $diary .swp .diff ; then
+		do_git $diary
+	fi
 }
 
 main
