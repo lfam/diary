@@ -7,7 +7,7 @@ do_git() {
 }
 
 prepend_date() {
-	date="$(date -R)"
+	date="$(date +"%a,%e %b %G %H:%M:%S %z")"
 	printf "$date\n\n" | cat - $1 > $1.swp && mv $1.swp $1
 }
 
