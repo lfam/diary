@@ -27,8 +27,8 @@ safety() {
 	warning="ERROR: the diary working files \'$diary$swap\' and/or \
 \'$diary$diff\' are present.
 This is unexpected and probably not what you want.
-Rename these files or change your diary name from $diary by editing \
-\'$(command -v diary)\'.
+Rename these files or pick another diary name besides $diary by editing \
+\'$(command -v diary)\' and renaming $diary to your new name.
 "
 
 	if { test -f $diary$swap || test -f $diary$diff ; }; then
