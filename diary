@@ -24,18 +24,17 @@ prepend_date() {
 }
 
 safety() {
-	warning="ERROR: the diary working files \'$diary$swap\' and/or \
-\'$diary$diff\' are present.
+	warning="ERROR: the diary working files \'$1$2\' and/or \
+\'$1$3' are present.
 This is unexpected and probably not what you want.
-Rename these files or pick another diary name besides $diary by editing \
-\'$(command -v diary)\' and renaming $diary to your new name.
+Rename these files or pick another diary name besides $1 by editing \
+\'$(command -v diary)\' and changing $1 to your new name.
 "
 
-	if { test -f $diary$swap || test -f $diary$diff ; }; then
+	if { test -f $1$2 || test -f $1$3 ; }; then
 		printf "$warning"
 		return 1
 	fi
-
 }
 
 main() {
