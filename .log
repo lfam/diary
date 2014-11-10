@@ -1,0 +1,10 @@
+Sun, 9 Nov 2014 20:31:25 -0500
+
+The function of this program could also be accomplished with the following
+command lines.
+
+To read:
+git log --pretty=format:"%aD%n%B"
+
+To edit:
+git commit --allow-empty
