@@ -1,12 +1,5 @@
 #!/bin/sh
 
-usage="Diary, for keeping a timestamped journal in a directory. If the
-directory is a git repo, your edits will be checked into git.
-
-Usage:	diary			# open your diary
-	diary --help		# print this help page
-"
-
 do_git() {
 	git rev-parse --git-dir 2> /dev/null &&
 	git add $1 &&
@@ -30,22 +23,35 @@ prepend_date() {
 	printf "$date\n\n" | cat - $1 > $1$2
 }
 
-main() {
-	if [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "-help" ]; then
-		printf "$usage"
-		return 0
-	elif [ -n "$1" ]; then
-		printf "$usage"
+safety() {
+	warning="ERROR: the diary working files \'$diary$swap\' and/or \
+\'$diary$diff\' are present.
+This is unexpected and probably not what you want.
+Rename these files or change your diary name from $diary by editing \
+\'$(command -v diary)\'.
+"
+
+	if { test -f $diary$swap || test -f $diary$diff ; }; then
+		printf "$warning"
 		return 1
 	fi
 
+}
+
+main() {
 	date="$(date +"%a,%e %b %G %H:%M:%S %z")"
 	diary=.log
+	swap=.swp
+	diff=.diff
+
+	if ! safety $diary $swap $diff ; then
+		return 1
+	fi
 
 	test -f $diary || touch $diary
-	prepend_date $diary .swp
-	${EDITOR:-vi} $diary.swp
-	if changed $diary .swp .diff ; then
+	prepend_date $diary $swap
+	${EDITOR:-vi} $diary$swap
+	if changed $diary $swap $diff ; then
 		do_git $diary
 	fi
 }
