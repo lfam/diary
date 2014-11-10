@@ -33,7 +33,7 @@ main() {
 	if [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "-help" ]; then
 		printf "$usage"
 		return 0
-	elif [ -n $1 ]; then
+	elif [ -n "$1" ]; then
 		printf "$usage"
 		return 1
 	fi
