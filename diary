@@ -3,7 +3,7 @@
 do_git() {
 	git rev-parse --git-dir 1> /dev/null 2>&1 &&
 	git add $1 &&
-	printf "Auto-commit of $1 by diary program\n" | git commit $1 -F - 
+	printf "Auto-commit of $1 by diary script\n" | git commit $1 -F - 
 }
 
 changed() {
@@ -54,4 +54,4 @@ main() {
 		do_git $diary
 	fi
 }
-main "$@"
+main
