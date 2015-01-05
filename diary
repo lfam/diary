@@ -24,9 +24,9 @@ prepend_date() {
 }
 
 safety() {
-	if test -f "$1$2"; then
+	if test -f "$1"; then
 		cat <<-EOF 1>&2
-		Swap file "$1$2" already exists! Aborting...
+		Swap file "$1" already exists! Aborting...
 		EOF
 		return 1
 	fi
@@ -40,8 +40,8 @@ main() {
 	readonly diff=.diff
 	readonly difffile=$diary$diff
 
-	safety $diary $swap || return 1
-	safety $diary $diff || return 1
+	safety $swapfile || return 1
+	safety $difffile || return 1
 	test -w $diary || touch $diary || return 1
 
 	prepend_date $diary $swap
