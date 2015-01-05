@@ -36,14 +36,16 @@ main() {
 	readonly date="$(date +"%a,%e %b %G %H:%M:%S %z")"
 	readonly diary=.log
 	readonly swap=.swp
+	readonly swapfile=$diary$swap
 	readonly diff=.diff
+	readonly difffile=$diary$diff
 
 	safety $diary $swap || return 1
 	safety $diary $diff || return 1
 	test -w $diary || touch $diary || return 1
 
 	prepend_date $diary $swap
-	${EDITOR:-vi} $diary$swap
+	${EDITOR:-vi} $swapfile
 	if changed $diary $swap $diff ; then
 		do_git $diary
 	fi
