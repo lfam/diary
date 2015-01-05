@@ -7,7 +7,7 @@ do_git() {
 }
 
 changed() {
-	prepend_date $1 $3
+	prepend_date $1 > $3
 	if diff "$2" "$3" >/dev/null 2>&1 ; then
 		rm $2
 		rm $3
@@ -20,7 +20,7 @@ changed() {
 }
 
 prepend_date() {
-	printf "$date\n\n" | cat - $1 > $2
+	printf "$date\n\n" | cat - $1
 }
 
 safety() {
@@ -44,7 +44,7 @@ main() {
 	safety $difffile || return 1
 	test -w $diary || touch $diary || return 1
 
-	prepend_date $diary $swapfile
+	prepend_date $diary > $swapfile
 	${EDITOR:-vi} $swapfile
 	if changed $diary $swapfile $difffile ; then
 		do_git $diary
