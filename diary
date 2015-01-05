@@ -6,10 +6,6 @@ do_git() {
 	&& echo "Auto-commit of $1 by diary script" | git commit "$1" -F -
 }
 
-prepend_date() {
-	printf "%s\n\n" "$1" | cat - "$2"
-}
-
 safety() {
 	if test -e "$1"; then
 		echo "Swap file $1 already exists! Aborting..." 1>&2
@@ -27,7 +23,7 @@ main() {
 	safety "$diff" || return 1
 	test -w "$diary" || touch "$diary" || return 1
 
-	prepend_date "$date" "$diary" | tee "$diff" > "$swap"
+	printf "%s\n\n" "$date" | cat - "$diary" | tee "$diff" > "$swap"
 	${EDITOR:-vi} "$swap"
 	if diff "$swap" "$diff" >/dev/null 2>&1 ; then
 		rm "$swap"
