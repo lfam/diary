@@ -1,9 +1,9 @@
 #!/bin/sh
 
 do_git() {
-	git rev-parse --git-dir 1> /dev/null 2>&1 &&
-	git add $1 &&
-	printf "Auto-commit of $1 by diary script\n" | git commit $1 -F - 
+	git rev-parse --git-dir 1> /dev/null 2>&1 \
+	&& git add $1 \
+	&& printf "Auto-commit of $1 by diary script\n" | git commit $1 -F - 
 }
 
 changed() {
