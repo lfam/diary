@@ -3,20 +3,7 @@
 do_git() {
 	git rev-parse --git-dir 1> /dev/null 2>&1 \
 	&& git add "$1" \
-	&& printf "Auto-commit of %s by diary script\n" "$1" | git commit "$1" -F -
-}
-
-changed() {
-	prepend_date "$4" "$1" > "$3"
-	if diff "$2" "$3" >/dev/null 2>&1 ; then
-		rm "$2"
-		rm "$3"
-		return 1
-	else
-		mv "$2" "$1"
-		rm "$3"
-		return 0
-	fi
+	&& echo "Auto-commit of $1 by diary script" | git commit "$1" -F -
 }
 
 prepend_date() {
@@ -24,10 +11,8 @@ prepend_date() {
 }
 
 safety() {
-	if test -f "$1"; then
-		cat <<-EOF 1>&2
-		Swap file "$1" already exists! Aborting...
-		EOF
+	if test -e "$1"; then
+		echo "Swap file $1 already exists! Aborting..." 1>&2
 		return 1
 	fi
 }
@@ -42,10 +27,15 @@ main() {
 	safety "$diff" || return 1
 	test -w "$diary" || touch "$diary" || return 1
 
-	prepend_date "$date" "$diary" > "$swap"
+	prepend_date "$date" "$diary" | tee "$diff" > "$swap"
 	${EDITOR:-vi} "$swap"
-	if changed "$diary" "$swap" "$diff" "$date" ; then
-		do_git "$diary"
+	if diff "$swap" "$diff" >/dev/null 2>&1 ; then
+		rm "$swap"
+		rm "$diff"
+	else
+		mv "$swap" "$diary"
+		rm "$diff"
+		do_git
 	fi
 }
 main
