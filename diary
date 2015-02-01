@@ -8,7 +8,7 @@ do_git() {
 
 safety() {
 	if test -e "$1"; then
-		echo "Swap file $1 already exists! Aborting..." 1>&2
+		echo "Swap file $1 already exists." 1>&2
 		return 1
 	fi
 }
@@ -20,8 +20,8 @@ main() {
 	readonly local diff=${diary}.diff
 	readonly local editor=${EDITOR:-vi}
 
-	safety "$swap" || return 1
-	safety "$diff" || return 1
+	safety "$swap" || { echo "Aborting!" 1>&2; return 1; }
+	safety "$diff" || { echo "Aborting!" 1>&2; return 1; }
 	test -w "$diary" || touch "$diary" || return 1
 
 	printf "%s\n\n" "$date" | cat - "$diary" | tee "$diff" > "$swap"
