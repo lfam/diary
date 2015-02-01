@@ -1,3 +1,19 @@
+Sun, 1 Feb 2015 18:54:25 -0500
+2015-02-01T17:00:01-0500
+tarsnap: Removing leading '/' from member names
+                                       Total size  Compressed size
+All archives                               500 GB           343 GB
+  (unique data)                            9.0 GB           5.4 GB
+This archive                               195 MB           167 MB
+New data                                   288 kB            86 kB
+2015-02-01T18:00:01-0500
+tarsnap: Removing leading '/' from member names
+                                       Total size  Compressed size
+All archives                               500 GB           343 GB
+  (unique data)                            9.0 GB           5.4 GB
+This archive                               195 MB           167 MB
+New data                                   143 kB            43 kB
+
 Mon, 5 Jan 2015 17:53:42 -0500
 Again
 
