@@ -39,14 +39,16 @@ main() {
 	readonly diff=.diff
 	editor=${EDITOR:-vi}
 
-	#if test $1 = '-'; then
-
 	safety $diary $swap || return 1
 	safety $diary $diff || return 1
 	test -w $diary || touch $diary || return 1
 
 	prepend_date $diary $swap
-	editor $diary$wap
+	if test X"$1" = X"-" ; then
+		$editor -
+	else
+		$editor $diary$swap
+	fi
 	if changed $diary $swap $diff ; then
 		do_git $diary
 	fi
