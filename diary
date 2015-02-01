@@ -37,13 +37,16 @@ main() {
 	readonly diary=.log
 	readonly swap=.swp
 	readonly diff=.diff
+	editor=${EDITOR:-vi}
+
+	#if test $1 = '-'; then
 
 	safety $diary $swap || return 1
 	safety $diary $diff || return 1
 	test -w $diary || touch $diary || return 1
 
 	prepend_date $diary $swap
-	${EDITOR:-vi} $diary$swap
+	editor $diary$wap
 	if changed $diary $swap $diff ; then
 		do_git $diary
 	fi
