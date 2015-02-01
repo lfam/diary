@@ -2,56 +2,42 @@
 
 do_git() {
 	git rev-parse --git-dir 1> /dev/null 2>&1 \
-	&& git add $1 \
-	&& printf "Auto-commit of $1 by diary script\n" | git commit $1 -F - 
-}
-
-changed() {
-	prepend_date $1 $3
-	if diff "$1$2" "$1$3" >/dev/null 2>&1 ; then
-		rm $1$2
-		rm $1$3
-		test -s $1 || rm $1
-		return 1
-	else
-		mv $1$2 $1
-		rm $1$3
-		return 0
-	fi
-}
-
-prepend_date() {
-	printf "$date\n\n" | cat - $1 > $1$2
+	&& git add "$1" \
+	&& echo "Auto-commit of $1 by diary script" | git commit "$1" -F -
 }
 
 safety() {
-	if test -f "$1$2"; then
-		cat <<-EOF 1>&2
-		Swap file "$1$2" already exists! Aborting...
-		EOF
+	if test -e "$1"; then
+		echo "Swap file $1 already exists! Aborting..." 1>&2
 		return 1
 	fi
 }
 
 main() {
-	readonly date="$(date +"%a,%e %b %G %H:%M:%S %z")"
-	readonly diary=.log
-	readonly swap=.swp
-	readonly diff=.diff
-	editor=${EDITOR:-vi}
+	readonly local date="$(date +"%a,%e %b %G %H:%M:%S %z")"
+	readonly local diary=.log
+	readonly local swap=${diary}.swp
+	readonly local diff=${diary}.diff
+	readonly local editor=${EDITOR:-vi}
 
-	safety $diary $swap || return 1
-	safety $diary $diff || return 1
-	test -w $diary || touch $diary || return 1
+	safety "$swap" || return 1
+	safety "$diff" || return 1
+	test -w "$diary" || touch "$diary" || return 1
 
-	prepend_date $diary $swap
+	printf "%s\n\n" "$date" | cat - "$diary" | tee "$diff" > "$swap"
 	if test X"$1" = X"-" ; then
 		$editor -
 	else
-		$editor $diary$swap
+		$editor $swap
 	fi
-	if changed $diary $swap $diff ; then
-		do_git $diary
+	if diff "$swap" "$diff" >/dev/null 2>&1 ; then
+		rm "$swap"
+		rm "$diff"
+		test -s $diary || rm $diary
+	else
+		mv "$swap" "$diary"
+		rm "$diff"
+		do_git "$diary"
 	fi
 }
 main
