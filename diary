@@ -24,10 +24,12 @@ main() {
 	safety "$diff" || { echo "Aborting!" 1>&2; return 1; }
 	test -w "$diary" || touch "$diary" || return 1
 
-	printf "%s\n\n" "$date" | cat - "$diary" | tee "$diff" > "$swap"
-	if test X"$1" = X"-" ; then
-		$editor -
-	else
+	if test "X$1" = "X-" ; then # read input from stdin
+		printf "%s\n\n" "$date" | cat - "$diary" > "$diff"
+		{ cat -; printf "\n"; } \
+			| { printf "%s\n" "$date"; cat - "$diary"; } > "$swap"
+	else # open editor for interactive
+		printf "%s\n\n" "$date" | cat - "$diary" | tee "$diff" > "$swap"
 		$editor $swap
 	fi
 	if diff "$swap" "$diff" >/dev/null 2>&1 ; then
@@ -40,4 +42,4 @@ main() {
 		do_git "$diary"
 	fi
 }
-main
+main "$@"
