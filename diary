@@ -24,18 +24,19 @@ main() {
 	safety "$diff" || { echo "Aborting!" 1>&2; return 1; }
 	test -w "$diary" || touch "$diary" || return 1
 
-	if test "X$1" = "X-" ; then # read input from stdin
+	if test $# -eq 0; then # open editor for user
+		printf "%s\n\n" "$date" | cat - "$diary" | tee "$diff" > "$swap"
+		$editor "$swap"
+	elif test "X$1" = "X-"; then # read input from stdin
 		printf "%s\n\n" "$date" | cat - "$diary" > "$diff"
 		{ cat -; printf "\n"; } \
 			| { printf "%s\n" "$date"; cat - "$diary"; } > "$swap"
-	else # open editor for interactive
-		printf "%s\n\n" "$date" | cat - "$diary" | tee "$diff" > "$swap"
-		$editor $swap
 	fi
+
 	if diff "$swap" "$diff" >/dev/null 2>&1 ; then
 		rm "$swap"
 		rm "$diff"
-		test -s $diary || rm $diary
+		test -s "$diary" || rm "$diary"
 	else
 		mv "$swap" "$diary"
 		rm "$diff"
