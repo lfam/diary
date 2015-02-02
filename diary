@@ -29,7 +29,7 @@ main() {
 			printf "%s\n\n" "$date";
 			cat "$diary";
 		} | tee "$diff" > "$swap"
-		$editor "$swap"
+		"$editor" "$swap"
 	elif test "X$1" = "X-"; then # read input from stdin
 		{
 			printf "%s\n\n" "$date"; 
