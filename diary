@@ -43,7 +43,7 @@ main() {
 		} > "$swap"
 	fi
 
-	if diff "$swap" "$diff" >/dev/null 2>&1 ; then
+	if cmp -s "$swap" "$diff"; then
 		rm "$swap"
 		rm "$diff"
 		test -s "$diary" || rm "$diary"
