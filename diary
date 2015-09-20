@@ -38,7 +38,14 @@ main() {
 	if test $# -eq 0; then
 		new_entry "$diary" "$date" > "$swap"
 		"$editor" "$swap"
+	elif test "X$1" = "X-"; then {
+		printf "%s\n" "$date"
+		cat -
+		printf "\n"
+		cat "$diary"
+	} > "$swap"
 	fi
+
 
 	if new_entry "$diary" "$date" | cmp -s - "$swap" ; then
 		rm "$swap"
