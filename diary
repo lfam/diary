@@ -7,9 +7,17 @@ do_git() {
 	&& echo "Auto-commit of $1 by diary script" | git commit "$1" -F -
 }
 
+new_entry() {
+	test $# -eq 2 || return 1
+
+	local diary="$1"
+	local date="$2"
+
+	printf "%s\n\n" "$date"
+	cat "$diary"
+}
+
 safety() {
-	# There should be no .swp files yet. If there are, then diary is either
-	# already running or exited unclean last time.
 	if test -e "$1"; then
 		echo "Swap file $1 already exists." 1>&2
 		return 1
@@ -17,72 +25,33 @@ safety() {
 }
 
 main() {
-	readonly local date="$(date +"%a,%e %b %G %H:%M:%S %z")"
+	local date="$(date +"%a,%e %b %G %H:%M:%S %z")"
 	readonly local editor=${EDITOR:-vi}
 
-	# $diary is the diary file
-	# $swap is the working copy of the diary file plus the new timestamp.
-	# $diff is the old copy of the diary plus the new timestamp.
+	local diary=.log
+	local swap=${diary}.log
 
-	# $ diff is used to check if we actually made a change to the diary in
-	# the editor. We don't want to save unchanged files because some
-	# editors (e.g. vim) will update timestamps if you :wq an unchanged
-	# file and we'd like to leave mtimes unchanged if file content is
-	# unchanged.
-
-	# TODO instead of using a diff file, could we save the timestamp and
-	# conditionally restore it? Or use a hash? The diary could get very
-	# large and having 3 copies of it could be unworkable on some systems.
-
-	# Well, it seems silly to do all this to work around vim's use of
-	# a swap file that is mv'ed over the original on :wq. Because we are
-	# just replicating that process trying to workaround it.
-
-	readonly local diary=.log
-	readonly local swap=${diary}.swp
-	readonly local diff=${diary}.diff
-
-	# Check if diary is already running, or if it could have exited unclean
-	# last time.
 	safety "$swap" || { echo "Aborting!" 1>&2; return 1; }
-	safety "$diff" || { echo "Aborting!" 1>&2; return 1; }
 
-	# Check if we can write to the diary.
 	test -w "$diary" || touch "$diary" || return 1
 
-	if test $# -eq 0; then {
-			# Make swap and diff files with a new timestamped log
-			# entry. Open swap file in editor
-			printf "%s\n\n" "$date";
-			cat "$diary";
-		} | tee "$diff" > "$swap"
+	if test $# -eq 0; then
+		new_entry "$diary" "$date" > "$swap"
 		"$editor" "$swap"
-	elif test "X$1" = "X-"; then {
-			# read input from stdin if $1 is '-'
-			printf "%s\n\n" "$date"; 
-			cat "$diary" ;
-		} > "$diff"
-		{
-			printf "%s\n" "$date";
-			cat -;
-			printf "\n";
-			cat "$diary";
-		} > "$swap"
 	fi
 
-	if cmp -s "$swap" "$diff"; then
-		# If swap and diff files are equal, remove them
+	if new_entry "$diary" "$date" | cmp -s - "$swap" ; then
 		rm "$swap"
-		rm "$diff"
-		# If diary file is zero bytes, then we have started a new diary
+		# If diary file is zero bytes, then we have opened a new diary
 		# but not put anything in it. Remove the zero byte file.
 		test -s "$diary" || rm "$diary"
 	else
-		# Edits have been made. Replace the old diary with the new
-		# version and try to commit to git.
-		mv "$swap" "$diary"
-		rm "$diff"
+		mv "$swap" "$diary" || {
+		printf "$ mv %s %s # returned 1\n" "$swap" "$diary" 1>&2
+		printf "Data is in %s\n" "$swap" 1>&2
+		return 1 ; }
 		do_git "$diary"
 	fi
+	return 0
 }
 main "$@"
